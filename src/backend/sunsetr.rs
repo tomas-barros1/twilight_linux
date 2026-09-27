@@ -41,6 +41,40 @@ impl BackendKind {
             _ => Self::Auto,
         }
     }
+
+    /// Ferramenta/binário que o backend exige disponível no sistema.
+    pub fn required_tool(self) -> Option<&'static str> {
+        match self {
+            Self::Hyprland => Some("hyprctl"),
+            Self::Hyprsunset => Some("hyprsunset"),
+            Self::Auto | Self::Wayland => None,
+        }
+    }
+
+    /// Verifica se o backend escolhido pode funcionar neste sistema.
+    pub fn is_supported(self) -> bool {
+        match self {
+            Self::Auto | Self::Wayland => true,
+            Self::Hyprland => {
+                std::env::var_os("HYPRLAND_INSTANCE_SIGNATURE").is_some()
+                    && tool_exists("hyprctl")
+            }
+            Self::Hyprsunset => {
+                std::env::var_os("HYPRLAND_INSTANCE_SIGNATURE").is_some()
+                    && tool_exists("hyprsunset")
+            }
+        }
+    }
+}
+
+fn tool_exists(bin: &str) -> bool {
+    Command::new(bin)
+        .arg("--version")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -333,8 +367,27 @@ impl SunsetrClient {
         ])
     }
 
+    /// Define o backend do sunsetr e **reinicia a instância** para recriá-lo.
+    ///
+    /// Trocar `hyprland` / `hyprsunset` / `wayland` só tem efeito depois de
+    /// recriar o backend do daemon — por isso o restart quando está rodando.
     pub fn set_backend(kind: BackendKind) -> Result<()> {
-        Self::set_fields(&[("backend", kind.as_str().into())])
+        Self::set_fields(&[("backend", kind.as_str().into())])?;
+        if Self::is_running() {
+            Self::restart()?;
+        }
+        Ok(())
+    }
+
+    /// Para a instância isolada e inicia de novo com a config atual.
+    pub fn restart() -> Result<()> {
+        let dir = Self::ensure_config_dir()?;
+        Self::stop_any()?;
+        start_detached(&dir)?;
+        if wait_until_running(Duration::from_secs(4)) {
+            return Ok(());
+        }
+        bail!("não foi possível reiniciar o sunsetr ({})", dir.display())
     }
 
     pub fn set_smoothing(startup: f64, shutdown: f64, enabled: bool) -> Result<()> {
@@ -449,6 +502,27 @@ pub enum UiPreset {
 }
 
 impl UiPreset {
+    /// Identificador estável para persistência (independe do idioma).
+    pub fn key(self) -> &'static str {
+        match self {
+            Self::Day => "day",
+            Self::Sunset => "sunset",
+            Self::Night => "night",
+            Self::Custom => "custom",
+            Self::Schedule => "schedule",
+        }
+    }
+
+    pub fn from_key(s: &str) -> Self {
+        match s {
+            "day" => Self::Day,
+            "sunset" => Self::Sunset,
+            "night" => Self::Night,
+            "custom" => Self::Custom,
+            _ => Self::Schedule,
+        }
+    }
+
     pub fn label(self) -> &'static str {
         match self {
             Self::Day => "Dia",

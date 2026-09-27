@@ -34,6 +34,8 @@ pub enum AppMsg {
     BackendDone {
         error: Option<String>,
         refresh: bool,
+        /// Se true, um erro deve reverter o interruptor do filtro.
+        revert: bool,
     },
     DebouncedApply,
 }
@@ -265,7 +267,7 @@ impl AppModel {
                 self.app_config.preferred_temp = temp;
                 self.app_config.preferred_gamma = gamma;
                 self.app_config.intensity = self.intensity;
-                self.app_config.last_ui_preset = UiPreset::Custom.label().into();
+                self.app_config.last_ui_preset = UiPreset::Custom.key().into();
                 self.preset = UiPreset::Custom;
                 let _ = self.app_config.save();
                 spawn_backend(sender, move || {
@@ -277,11 +279,15 @@ impl AppModel {
                     Ok(())
                 });
             }
-            AppMsg::BackendDone { error, refresh } => {
+            AppMsg::BackendDone {
+                error,
+                refresh,
+                revert,
+            } => {
                 if let Some(err) = error {
                     self.error = Some(err.clone());
                     // Se falhou ao ligar/iniciar, reverte o interruptor.
-                    if err.contains("iniciar o sunsetr") || err.contains("lançar sunsetr") {
+                    if revert {
                         self.enabled = false;
                         self.pending_apply = false;
                     }
@@ -351,7 +357,7 @@ impl AppModel {
         match out {
             DashboardOutput::SetEnabled(on) => {
                 if on {
-                    spawn_backend(sender.clone(), || {
+                    spawn_backend_revert(sender.clone(), || {
                         SunsetrClient::ensure_running()?;
                         Ok(())
                     });
@@ -383,7 +389,7 @@ impl AppModel {
             }
             DashboardOutput::ApplyPreset(preset) => {
                 self.preset = preset;
-                self.app_config.last_ui_preset = preset.label().into();
+                self.app_config.last_ui_preset = preset.key().into();
                 let _ = self.app_config.save();
                 let gamma = self.gamma;
                 match preset {
@@ -425,6 +431,16 @@ impl AppModel {
                 });
             }
             SettingsOutput::SetBackend(kind) => {
+                if !kind.is_supported() {
+                    let tool = kind.required_tool().unwrap_or("hyprctl");
+                    self.error = Some(format!(
+                        "backend '{}' indisponível: '{}' não encontrado ou sessão não é Hyprland",
+                        kind.as_str(),
+                        tool
+                    ));
+                    self.sync_children();
+                    return;
+                }
                 spawn_backend(sender, move || {
                     SunsetrClient::set_backend(kind)?;
                     Ok(())
@@ -516,11 +532,28 @@ fn spawn_backend<F>(sender: ComponentSender<AppModel>, f: F)
 where
     F: FnOnce() -> anyhow::Result<()> + Send + 'static,
 {
+    spawn_backend_ex(sender, false, f);
+}
+
+/// Como `spawn_backend`, mas em caso de erro reverte o interruptor do filtro
+/// (usado ao ligar o filtro).
+fn spawn_backend_revert<F>(sender: ComponentSender<AppModel>, f: F)
+where
+    F: FnOnce() -> anyhow::Result<()> + Send + 'static,
+{
+    spawn_backend_ex(sender, true, f);
+}
+
+fn spawn_backend_ex<F>(sender: ComponentSender<AppModel>, revert: bool, f: F)
+where
+    F: FnOnce() -> anyhow::Result<()> + Send + 'static,
+{
     std::thread::spawn(move || {
         let error = f().err().map(|e| e.to_string());
         sender.input(AppMsg::BackendDone {
             error,
             refresh: true,
+            revert,
         });
     });
 }

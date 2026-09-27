@@ -53,7 +53,7 @@ impl Default for AppConfig {
         Self {
             start_filter_on_login: false,
             hide_on_close: true,
-            last_ui_preset: UiPreset::Schedule.label().to_string(),
+            last_ui_preset: UiPreset::Schedule.key().to_string(),
             preferred_temp: default_temp(),
             preferred_gamma: default_gamma(),
             intensity: default_intensity(),
@@ -89,12 +89,13 @@ impl AppConfig {
     }
 
     pub fn ui_preset(&self) -> UiPreset {
+        // Aceita também os rótulos antigos em pt-BR (compatibilidade).
         match self.last_ui_preset.as_str() {
             "Dia" => UiPreset::Day,
             "Pôr do sol" => UiPreset::Sunset,
             "Noite" => UiPreset::Night,
             "Personalizado" => UiPreset::Custom,
-            _ => UiPreset::Schedule,
+            other => UiPreset::from_key(other),
         }
     }
 }
