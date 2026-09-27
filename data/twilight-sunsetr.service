@@ -1,0 +1,16 @@
+[Unit]
+Description=Twilight PC blue-light filter (sunsetr with isolated config)
+Documentation=file:///usr/share/metainfo/org.twilight_pc.Twilight.metainfo.xml
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+# %h = home do usuário; a pasta é criada pelo Twilight PC na primeira execução.
+ExecStart=/usr/bin/sunsetr --config %h/.config/Twilight/sunsetr
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

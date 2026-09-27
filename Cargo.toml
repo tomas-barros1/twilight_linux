@@ -1,0 +1,25 @@
+[package]
+name = "twilight_pc"
+version = "0.1.0"
+edition = "2021"
+description = "Filtro de luz azul nativo para Linux, inspirado no Twilight (Android)"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/tom/twilight_pc"
+
+[[bin]]
+name = "twilight-pc"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+directories = "5"
+relm4 = { version = "0.9", features = ["libadwaita", "gnome_46"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+tempfile = "3"

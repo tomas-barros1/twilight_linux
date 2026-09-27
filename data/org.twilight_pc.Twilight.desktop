@@ -1,0 +1,21 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=Twilight
+Name[pt_BR]=Twilight
+GenericName=Blue light filter
+GenericName[pt_BR]=Filtro de luz azul
+Comment=Native blue light filter for Wayland (Hyprland and others)
+Comment[pt_BR]=Filtro de luz azul nativo para Wayland (Hyprland e outros)
+Exec=twilight-pc
+TryExec=twilight-pc
+Icon=org.twilight_pc.Twilight
+Terminal=false
+Categories=Utility;GTK;Settings;Accessibility;
+Keywords=twilight;blue;light;filter;night;sunsetr;redshift;hyprland;wayland;
+Keywords[pt_BR]=twilight;filtro;luz;azul;noite;sunsetr;redshift;hyprland;wayland;
+StartupNotify=true
+StartupWMClass=org.twilight_pc.Twilight
+DBusActivatable=false
+X-GNOME-UsesNotifications=false
+X-Purism-FormFactor=Workstation;Mobile;

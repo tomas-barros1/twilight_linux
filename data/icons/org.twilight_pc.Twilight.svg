@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Twilight">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1440"/>
+      <stop offset="55%" stop-color="#4a2c6a"/>
+      <stop offset="100%" stop-color="#c45c26"/>
+    </linearGradient>
+    <linearGradient id="moon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffe9c2"/>
+      <stop offset="100%" stop-color="#f0c27b"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#sky)"/>
+  <circle cx="86" cy="44" r="26" fill="url(#moon)"/>
+  <circle cx="96" cy="36" r="22" fill="#4a2c6a"/>
+  <path d="M0 92 C28 78 52 98 76 88 C100 78 112 86 128 80 L128 128 L0 128 Z" fill="#2a1838" opacity="0.85"/>
+</svg>
