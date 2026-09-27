@@ -41,15 +41,21 @@ cargo run --release
 5. Presets **Dia / Pôr do sol / Noite** usam modo estático; **Agendado** restaura o modo de transição (geo/manual).
 6. Em **Ajustes**: horários, localização, backend (`auto` / `hyprland` / `hyprsunset` / `wayland`), autostart via `systemd --user`.
 
+A interface segue o idioma do sistema (`LANG`): **português** ou **inglês** (traduções em `locales/*.json` via [rust-i18n](https://github.com/longbridge/rust-i18n)).
+
 Fechar a janela **não** desliga o filtro (opção “Ocultar ao fechar”). O processo `sunsetr` continua aplicando a temperatura no compositor.
 
 ### Configuração isolada
 
 O Twilight **não** usa `~/.config/sunsetr/`. Em vez disso grava em:
 
-`~/.config/Twilight/sunsetr/sunsetr.toml`
+`~/.config/twilight/sunsetr/sunsetr.toml`
 
 Ao ligar o filtro, o app para qualquer sunsetr padrão (incluindo `sunsetr.service`) e inicia uma instância com `--config` apontando para essa pasta.
+
+### Troca de backend
+
+Trocar o backend em Ajustes (`auto` → `hyprland` / `hyprsunset` / `wayland`) **reinicia a instância do sunsetr** para recriar o backend — sem isso a mudança não teria efeito no daemon. O app valida antes se a ferramenta necessária existe (ex.: `hyprsunset` instalado, sessão Hyprland para `hyprland`).
 
 ## Autostart do filtro (systemd --user)
 
@@ -69,8 +75,8 @@ O app avisa se detectar `hyprsunset`, `gammastep`, `wlsunset` ou `redshift` roda
 
 | Arquivo | Função |
 |---------|--------|
-| `~/.config/Twilight/config.toml` | Preferências da UI |
-| `~/.config/Twilight/sunsetr/` | Config do sunsetr **isolada** (via `--config`) |
+| `~/.config/twilight/config.toml` | Preferências da UI |
+| `~/.config/twilight/sunsetr/` | Config do sunsetr **isolada** (via `--config`) |
 | `~/.config/sunsetr/` | **Não é usado** pelo Twilight |
 
 ## Desenvolvimento

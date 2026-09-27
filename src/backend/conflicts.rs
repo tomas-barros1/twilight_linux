@@ -2,6 +2,8 @@
 
 use std::process::Command;
 
+use rust_i18n::t;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConflictReport {
     pub name: String,
@@ -9,18 +11,23 @@ pub struct ConflictReport {
 }
 
 /// Processos conhecidos que também aplicam temperatura/gama e podem brigar com sunsetr.
-const CONFLICT_BINS: &[(&str, &str)] = &[
-    ("hyprsunset", "hyprsunset (IPC Hyprland) — pode sobrescrever o CTM do sunsetr"),
-    ("gammastep", "gammastep — filtro Wayland/X11 independente"),
-    ("wlsunset", "wlsunset — filtro Wayland independente"),
-    ("redshift", "redshift — filtro clássico (X11/Wayland)"),
-    ("nightlight", "nightlight / outro filtro de noite"),
-];
+const CONFLICT_BINS: &[&str] = &["hyprsunset", "gammastep", "wlsunset", "redshift", "nightlight"];
+
+fn detail_for(bin: &str) -> String {
+    match bin {
+        "hyprsunset" => t!("conflict.hyprsunset"),
+        "gammastep" => t!("conflict.gammastep"),
+        "wlsunset" => t!("conflict.wlsunset"),
+        "redshift" => t!("conflict.redshift"),
+        _ => t!("conflict.nightlight"),
+    }
+    .into_owned()
+}
 
 pub fn detect_conflicts(sunsetr_running: bool) -> Vec<ConflictReport> {
     let mut out = Vec::new();
 
-    for &(bin, detail) in CONFLICT_BINS {
+    for &bin in CONFLICT_BINS {
         if process_running(bin) {
             // hyprsunset só é conflito se estiver rodando em paralelo ao sunsetr
             // (sunsetr pode usá-lo como backend interno, mas tipicamente não deixa
@@ -30,7 +37,7 @@ pub fn detect_conflicts(sunsetr_running: bool) -> Vec<ConflictReport> {
             }
             out.push(ConflictReport {
                 name: bin.to_string(),
-                detail: detail.to_string(),
+                detail: detail_for(bin),
             });
         }
     }

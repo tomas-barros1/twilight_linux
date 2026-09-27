@@ -2,6 +2,7 @@
 
 use relm4::adw::prelude::*;
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, adw, gtk, gtk::glib};
+use rust_i18n::t;
 
 use crate::backend::{BackendKind, TransitionMode};
 
@@ -86,23 +87,17 @@ impl SimpleComponent for SettingsModel {
 
     view! {
         adw::PreferencesPage {
-            set_title: "Ajustes",
+            set_title: &t!("tab.settings"),
 
             add = &adw::PreferencesGroup {
-                set_title: "Agendamento",
-                set_description: Some("Grava em ~/.config/Twilight/sunsetr/ (isolado de ~/.config/sunsetr)."),
+                set_title: &t!("settings.schedule"),
+                set_description: Some(&t!("settings.schedule.desc")),
                 #[watch]
                 set_sensitive: model.data.backend_ok,
 
                 adw::ComboRow {
-                    set_title: "Modo de transição",
-                    set_model: Some(&gtk::StringList::new(&[
-                        TransitionMode::Geo.label(),
-                        TransitionMode::StartAt.label(),
-                        TransitionMode::FinishBy.label(),
-                        TransitionMode::Center.label(),
-                        TransitionMode::Static.label(),
-                    ])),
+                    set_title: &t!("settings.mode"),
+                    set_model: Some(&mode_list()),
                     #[watch]
                     #[block_signal(mode_handler)]
                     set_selected: mode_index(model.data.transition_mode),
@@ -112,7 +107,7 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::EntryRow {
-                    set_title: "Início da noite (pôr do sol)",
+                    set_title: &t!("settings.sunset"),
                     #[watch]
                     #[block_signal(sunset_handler)]
                     set_text: &hhmm(&model.data.sunset),
@@ -122,7 +117,7 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::EntryRow {
-                    set_title: "Fim da noite (nascer do sol)",
+                    set_title: &t!("settings.sunrise"),
                     #[watch]
                     #[block_signal(sunrise_handler)]
                     set_text: &hhmm(&model.data.sunrise),
@@ -132,8 +127,8 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::SpinRow {
-                    set_title: "Duração da transição (minutos)",
-                    set_subtitle: "Usado nos modos manuais e como referência",
+                    set_title: &t!("settings.transition"),
+                    set_subtitle: &t!("settings.transition.sub"),
                     set_adjustment: Some(&gtk::Adjustment::new(
                         model.data.transition_duration as f64,
                         1.0,
@@ -152,9 +147,9 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::ActionRow {
-                    set_title: "Aplicar horários",
+                    set_title: &t!("settings.apply_schedule"),
                     add_suffix = &gtk::Button {
-                        set_label: "Aplicar",
+                        set_label: &t!("action.apply"),
                         set_valign: gtk::Align::Center,
                         add_css_class: "suggested-action",
                         connect_clicked[sender] => move |_| {
@@ -165,12 +160,12 @@ impl SimpleComponent for SettingsModel {
             },
 
             add = &adw::PreferencesGroup {
-                set_title: "Temperaturas dia / noite",
+                set_title: &t!("settings.temps"),
                 #[watch]
                 set_sensitive: model.data.backend_ok,
 
                 adw::SpinRow {
-                    set_title: "Temperatura diurna (K)",
+                    set_title: &t!("settings.day_temp"),
                     set_adjustment: Some(&gtk::Adjustment::new(
                         model.data.day_temp as f64, 1000.0, 20000.0, 50.0, 200.0, 0.0,
                     )),
@@ -184,7 +179,7 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::SpinRow {
-                    set_title: "Temperatura noturna (K)",
+                    set_title: &t!("settings.night_temp"),
                     set_adjustment: Some(&gtk::Adjustment::new(
                         model.data.night_temp as f64, 1000.0, 20000.0, 50.0, 200.0, 0.0,
                     )),
@@ -198,7 +193,7 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::SpinRow {
-                    set_title: "Gamma diurno (%)",
+                    set_title: &t!("settings.day_gamma"),
                     set_adjustment: Some(&gtk::Adjustment::new(
                         model.data.day_gamma, 10.0, 200.0, 1.0, 5.0, 0.0,
                     )),
@@ -212,7 +207,7 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::SpinRow {
-                    set_title: "Gamma noturno (%)",
+                    set_title: &t!("settings.night_gamma"),
                     set_adjustment: Some(&gtk::Adjustment::new(
                         model.data.night_gamma, 10.0, 200.0, 1.0, 5.0, 0.0,
                     )),
@@ -226,9 +221,9 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::ActionRow {
-                    set_title: "Aplicar temperaturas",
+                    set_title: &t!("settings.apply_temps"),
                     add_suffix = &gtk::Button {
-                        set_label: "Aplicar",
+                        set_label: &t!("action.apply"),
                         set_valign: gtk::Align::Center,
                         add_css_class: "suggested-action",
                         connect_clicked[sender] => move |_| {
@@ -239,13 +234,13 @@ impl SimpleComponent for SettingsModel {
             },
 
             add = &adw::PreferencesGroup {
-                set_title: "Localização",
-                set_description: Some("Usada no modo geo (nascer/pôr do sol reais)."),
+                set_title: &t!("settings.location"),
+                set_description: Some(&t!("settings.location.desc")),
                 #[watch]
                 set_sensitive: model.data.backend_ok,
 
                 adw::SpinRow {
-                    set_title: "Latitude",
+                    set_title: &t!("settings.latitude"),
                     set_adjustment: Some(&gtk::Adjustment::new(
                         model.data.latitude, -90.0, 90.0, 0.01, 1.0, 0.0,
                     )),
@@ -259,7 +254,7 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::SpinRow {
-                    set_title: "Longitude",
+                    set_title: &t!("settings.longitude"),
                     set_adjustment: Some(&gtk::Adjustment::new(
                         model.data.longitude, -180.0, 180.0, 0.01, 1.0, 0.0,
                     )),
@@ -273,10 +268,10 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::ActionRow {
-                    set_title: "Aplicar localização",
-                    set_subtitle: "Ou use `sunsetr geo` no terminal para escolher uma cidade",
+                    set_title: &t!("settings.apply_location"),
+                    set_subtitle: &t!("settings.apply_location.sub"),
                     add_suffix = &gtk::Button {
-                        set_label: "Aplicar",
+                        set_label: &t!("action.apply"),
                         set_valign: gtk::Align::Center,
                         add_css_class: "suggested-action",
                         connect_clicked[sender] => move |_| {
@@ -287,13 +282,13 @@ impl SimpleComponent for SettingsModel {
             },
 
             add = &adw::PreferencesGroup {
-                set_title: "Backend e exibição",
+                set_title: &t!("settings.backend_group"),
                 #[watch]
                 set_sensitive: model.data.backend_ok,
 
                 adw::ComboRow {
-                    set_title: "Backend sunsetr",
-                    set_subtitle: "auto escolhe CTM Hyprland / hyprsunset / Wayland",
+                    set_title: &t!("settings.backend"),
+                    set_subtitle: &t!("settings.backend.sub"),
                     set_model: Some(&gtk::StringList::new(&[
                         "auto",
                         "hyprland",
@@ -309,7 +304,7 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::SpinRow {
-                    set_title: "Duração do fade ao iniciar (minutos)",
+                    set_title: &t!("settings.fade"),
                     set_adjustment: Some(&gtk::Adjustment::new(
                         model.data.startup_duration, 0.0, 60.0, 0.1, 1.0, 0.0,
                     )),
@@ -324,11 +319,11 @@ impl SimpleComponent for SettingsModel {
             },
 
             add = &adw::PreferencesGroup {
-                set_title: "Aplicativo",
+                set_title: &t!("settings.app"),
 
                 adw::ActionRow {
-                    set_title: "Iniciar filtro com a sessão",
-                    set_subtitle: "Ativa twilight-sunsetr.service (config isolada; não usa ~/.config/sunsetr)",
+                    set_title: &t!("settings.autostart"),
+                    set_subtitle: &t!("settings.autostart.sub"),
                     #[name(login_switch)]
                     add_suffix = &gtk::Switch {
                         set_valign: gtk::Align::Center,
@@ -343,8 +338,8 @@ impl SimpleComponent for SettingsModel {
                 },
 
                 adw::ActionRow {
-                    set_title: "Ocultar ao fechar a janela",
-                    set_subtitle: "O filtro continua ativo enquanto o sunsetr estiver rodando",
+                    set_title: &t!("settings.hide_on_close"),
+                    set_subtitle: &t!("settings.hide_on_close.sub"),
                     add_suffix = &gtk::Switch {
                         set_valign: gtk::Align::Center,
                         #[watch]
@@ -359,12 +354,12 @@ impl SimpleComponent for SettingsModel {
             },
 
             add = &adw::PreferencesGroup {
-                set_title: "Conflitos detectados",
+                set_title: &t!("settings.conflicts"),
                 #[watch]
                 set_visible: !model.data.conflicts.is_empty(),
 
                 adw::ActionRow {
-                    set_title: "Outros filtros ativos",
+                    set_title: &t!("settings.conflicts.title"),
                     #[watch]
                     set_subtitle: &model.data.conflicts.join(" · "),
                 },
@@ -517,4 +512,19 @@ fn index_to_backend(idx: u32) -> BackendKind {
 
 fn hhmm(t: &str) -> String {
     t.chars().take(5).collect()
+}
+
+/// Lista traduzida dos modos de transição (mesma ordem de `mode_index`).
+fn mode_list() -> gtk::StringList {
+    let list = gtk::StringList::new(&[]);
+    for mode in [
+        TransitionMode::Geo,
+        TransitionMode::StartAt,
+        TransitionMode::FinishBy,
+        TransitionMode::Center,
+        TransitionMode::Static,
+    ] {
+        list.append(&mode.label());
+    }
+    list
 }

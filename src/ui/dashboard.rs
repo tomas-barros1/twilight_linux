@@ -5,6 +5,7 @@ use std::rc::Rc;
 
 use relm4::adw::prelude::*;
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, adw, gtk, gtk::glib};
+use rust_i18n::t;
 
 use crate::backend::{Period, UiPreset};
 use crate::color::{intensity_to_kelvin, kelvin_to_intensity, kelvin_to_rgb};
@@ -70,21 +71,21 @@ impl SimpleComponent for DashboardModel {
 
     view! {
         adw::PreferencesPage {
-            set_title: "Filtro",
+            set_title: &t!("tab.filter"),
 
             add = &adw::PreferencesGroup {
-                set_title: "Status",
-                set_description: Some("Filtro aplicado pelo sunsetr com config isolada do Twilight."),
+                set_title: &t!("dash.status"),
+                set_description: Some(&t!("dash.status.desc")),
 
                 adw::ActionRow {
-                    set_title: "Estado atual",
+                    set_title: &t!("dash.state"),
                     #[watch]
                     set_subtitle: &status_subtitle(&model),
 
                     add_suffix = &gtk::Button {
                         set_icon_name: "view-refresh-symbolic",
                         set_valign: gtk::Align::Center,
-                        set_tooltip_text: Some("Atualizar"),
+                        set_tooltip_text: Some(&t!("dash.refresh")),
                         add_css_class: "flat",
                         connect_clicked[sender] => move |_| {
                             sender.input(DashboardInput::Refresh);
@@ -93,8 +94,8 @@ impl SimpleComponent for DashboardModel {
                 },
 
                 adw::ActionRow {
-                    set_title: "Filtro de luz azul",
-                    set_subtitle: "Liga ou desliga o filtro no compositor",
+                    set_title: &t!("dash.filter"),
+                    set_subtitle: &t!("dash.filter.sub"),
 
                     add_suffix = &gtk::Switch {
                         set_valign: gtk::Align::Center,
@@ -110,7 +111,7 @@ impl SimpleComponent for DashboardModel {
             },
 
             add = &adw::PreferencesGroup {
-                set_title: "Aparência",
+                set_title: &t!("dash.appearance"),
                 #[watch]
                 set_sensitive: model.enabled && model.backend_ok,
 
@@ -128,7 +129,7 @@ impl SimpleComponent for DashboardModel {
 
                 gtk::Label {
                     #[watch]
-                    set_label: &format!("Pré-visualização · {} K", model.temperature),
+                    set_label: &t!("dash.preview", temp = model.temperature),
                     set_margin_bottom: 8,
                     set_css_classes: &["dim-label", "caption"],
                 },
@@ -143,7 +144,7 @@ impl SimpleComponent for DashboardModel {
                     gtk::Box {
                         set_orientation: gtk::Orientation::Horizontal,
                         gtk::Label {
-                            set_label: "Temperatura",
+                            set_label: &t!("dash.temperature"),
                             set_halign: gtk::Align::Start,
                             set_hexpand: true,
                         },
@@ -179,7 +180,7 @@ impl SimpleComponent for DashboardModel {
                     gtk::Box {
                         set_orientation: gtk::Orientation::Horizontal,
                         gtk::Label {
-                            set_label: "Intensidade",
+                            set_label: &t!("dash.intensity"),
                             set_halign: gtk::Align::Start,
                             set_hexpand: true,
                         },
@@ -215,7 +216,7 @@ impl SimpleComponent for DashboardModel {
                     gtk::Box {
                         set_orientation: gtk::Orientation::Horizontal,
                         gtk::Label {
-                            set_label: "Brilho (gamma)",
+                            set_label: &t!("dash.gamma"),
                             set_halign: gtk::Align::Start,
                             set_hexpand: true,
                         },
@@ -243,8 +244,8 @@ impl SimpleComponent for DashboardModel {
             },
 
             add = &adw::PreferencesGroup {
-                set_title: "Presets",
-                set_description: Some("Dia, pôr do sol e noite usam modo estático. Agendado restaura o horário."),
+                set_title: &t!("dash.presets"),
+                set_description: Some(&t!("dash.presets.desc")),
                 #[watch]
                 set_sensitive: model.enabled && model.backend_ok,
 
@@ -260,7 +261,7 @@ impl SimpleComponent for DashboardModel {
 
                     #[name(btn_day)]
                     gtk::ToggleButton {
-                        set_label: "Dia",
+                        set_label: &t!("preset.day"),
                         set_hexpand: true,
                         #[watch]
                         #[block_signal(day_handler)]
@@ -273,7 +274,7 @@ impl SimpleComponent for DashboardModel {
                     },
                     #[name(btn_sunset)]
                     gtk::ToggleButton {
-                        set_label: "Pôr do sol",
+                        set_label: &t!("preset.sunset"),
                         set_hexpand: true,
                         #[watch]
                         #[block_signal(sunset_handler)]
@@ -286,7 +287,7 @@ impl SimpleComponent for DashboardModel {
                     },
                     #[name(btn_night)]
                     gtk::ToggleButton {
-                        set_label: "Noite",
+                        set_label: &t!("preset.night"),
                         set_hexpand: true,
                         #[watch]
                         #[block_signal(night_handler)]
@@ -299,7 +300,7 @@ impl SimpleComponent for DashboardModel {
                     },
                     #[name(btn_schedule)]
                     gtk::ToggleButton {
-                        set_label: "Agendado",
+                        set_label: &t!("preset.schedule"),
                         set_hexpand: true,
                         #[watch]
                         #[block_signal(schedule_handler)]
@@ -314,18 +315,18 @@ impl SimpleComponent for DashboardModel {
             },
 
             add = &adw::PreferencesGroup {
-                set_title: "Avisos",
+                set_title: &t!("dash.warnings"),
                 #[watch]
                 set_visible: model.error.is_some() || !model.conflicts.is_empty() || !model.backend_ok,
 
                 adw::ActionRow {
                     #[watch]
-                    set_title: if !model.backend_ok {
-                        "sunsetr não encontrado"
+                    set_title: &if !model.backend_ok {
+                        t!("warn.sunsetr_missing")
                     } else if model.error.is_some() {
-                        "Erro do backend"
+                        t!("warn.backend_error")
                     } else {
-                        "Possível conflito"
+                        t!("warn.conflict")
                     },
                     #[watch]
                     set_subtitle: &warning_text(&model),
@@ -446,7 +447,7 @@ impl SimpleComponent for DashboardModel {
                     return;
                 }
                 self.preset = preset;
-                self.preset_label = preset.label().to_string();
+                self.preset_label = preset.label();
                 sender.output(DashboardOutput::ApplyPreset(preset)).ok();
             }
             DashboardInput::Refresh => {
@@ -459,15 +460,18 @@ impl SimpleComponent for DashboardModel {
 
 fn status_subtitle(model: &DashboardModel) -> String {
     if !model.backend_ok {
-        return "Instale o pacote sunsetr para aplicar o filtro no desktop.".into();
+        return t!("status.install_hint").into_owned();
     }
     if !model.enabled {
-        return "Filtro desligado".into();
+        return t!("status.off").into_owned();
     }
     let next = if model.next_period.is_empty() {
         String::new()
     } else {
-        format!(" · próximo: {}", short_time(&model.next_period))
+        format!(
+            " · {}",
+            t!("status.next", t = short_time(&model.next_period))
+        )
     };
     format!(
         "{} · {} K · gamma {:.0}% · {}{}",

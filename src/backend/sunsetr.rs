@@ -9,6 +9,7 @@ use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, anyhow, bail};
+use rust_i18n::t;
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -108,14 +109,15 @@ impl TransitionMode {
         }
     }
 
-    pub fn label(self) -> &'static str {
+    pub fn label(self) -> String {
         match self {
-            Self::Geo => "Nascer/pôr do sol (localização)",
-            Self::FinishBy => "Terminar até",
-            Self::StartAt => "Começar às",
-            Self::Center => "Centralizado",
-            Self::Static => "Estático (sem agendamento)",
+            Self::Geo => t!("mode.geo"),
+            Self::FinishBy => t!("mode.finish_by"),
+            Self::StartAt => t!("mode.start_at"),
+            Self::Center => t!("mode.center"),
+            Self::Static => t!("mode.static"),
         }
+        .into_owned()
     }
 }
 
@@ -141,15 +143,16 @@ impl Period {
         }
     }
 
-    pub fn label(self) -> &'static str {
+    pub fn label(self) -> String {
         match self {
-            Self::Day => "Dia",
-            Self::Sunset => "Pôr do sol",
-            Self::Night => "Noite",
-            Self::Sunrise => "Nascer do sol",
-            Self::Static => "Estático",
-            Self::Unknown => "Desconhecido",
+            Self::Day => t!("period.day"),
+            Self::Sunset => t!("period.sunset"),
+            Self::Night => t!("period.night"),
+            Self::Sunrise => t!("period.sunrise"),
+            Self::Static => t!("period.static"),
+            Self::Unknown => t!("period.unknown"),
         }
+        .into_owned()
     }
 }
 
@@ -387,7 +390,10 @@ impl SunsetrClient {
         if wait_until_running(Duration::from_secs(4)) {
             return Ok(());
         }
-        bail!("não foi possível reiniciar o sunsetr ({})", dir.display())
+        bail!(
+            "{}",
+            t!("error.start_sunsetr", dir = dir.display().to_string())
+        )
     }
 
     pub fn set_smoothing(startup: f64, shutdown: f64, enabled: bool) -> Result<()> {
@@ -418,8 +424,8 @@ impl SunsetrClient {
         }
 
         bail!(
-            "não foi possível iniciar o sunsetr com config do Twilight ({})",
-            dir.display()
+            "{}",
+            t!("error.start_sunsetr", dir = dir.display().to_string())
         )
     }
 
@@ -523,14 +529,15 @@ impl UiPreset {
         }
     }
 
-    pub fn label(self) -> &'static str {
+    pub fn label(self) -> String {
         match self {
-            Self::Day => "Dia",
-            Self::Sunset => "Pôr do sol",
-            Self::Night => "Noite",
-            Self::Custom => "Personalizado",
-            Self::Schedule => "Agendado",
+            Self::Day => t!("preset.day"),
+            Self::Sunset => t!("preset.sunset"),
+            Self::Night => t!("preset.night"),
+            Self::Custom => t!("preset.custom"),
+            Self::Schedule => t!("preset.schedule"),
         }
+        .into_owned()
     }
 }
 
@@ -666,8 +673,13 @@ mod tests {
 
     #[test]
     fn period_labels() {
+        rust_i18n::set_locale("pt");
         assert_eq!(Period::parse("night").label(), "Noite");
         assert_eq!(TransitionMode::parse("geo").as_str(), "geo");
+        assert_eq!(UiPreset::from_key("night"), UiPreset::Night);
+        rust_i18n::set_locale("en");
+        assert_eq!(Period::parse("night").label(), "Night");
+        rust_i18n::set_locale("pt");
     }
 
     #[test]

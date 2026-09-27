@@ -7,6 +7,7 @@ use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, SimpleComponent,
     adw, gtk, gtk::glib,
 };
+use rust_i18n::t;
 
 use crate::backend::{
     BackendKind, ConflictReport, Period, SunsetrClient, SunsetrConfig, TransitionMode, UiPreset,
@@ -84,7 +85,7 @@ impl SimpleComponent for AppModel {
                         #[wrap(Some)]
                         set_title_widget = &adw::WindowTitle {
                             set_title: "Twilight",
-                            set_subtitle: "Filtro de luz azul",
+                            set_subtitle: &t!("app.subtitle"),
                         },
                     },
 
@@ -98,13 +99,13 @@ impl SimpleComponent for AppModel {
                             add_titled_with_icon: (
                                 model.dashboard.widget(),
                                 Some("filter"),
-                                "Filtro",
+                                &t!("tab.filter"),
                                 "night-light-symbolic",
                             ),
                             add_titled_with_icon: (
                                 model.settings.widget(),
                                 Some("settings"),
-                                "Ajustes",
+                                &t!("tab.settings"),
                                 "emblem-system-symbolic",
                             ),
                         },
@@ -141,13 +142,13 @@ impl SimpleComponent for AppModel {
                 gamma,
                 period: Period::Unknown,
                 preset,
-                preset_label: preset.label().to_string(),
+                preset_label: preset.label(),
                 next_period: String::new(),
                 backend_ok,
                 error: if backend_ok {
                     None
                 } else {
-                    Some("sunsetr não está instalado".into())
+                    Some(t!("error.backend_missing").into_owned())
                 },
                 conflicts: Vec::new(),
             })
@@ -273,7 +274,7 @@ impl AppModel {
                 spawn_backend(sender, move || {
                     // Só aplica se já estiver rodando; o toggle é quem inicia.
                     if !SunsetrClient::is_running() {
-                        anyhow::bail!("filtro desligado — ligue o interruptor primeiro");
+                        anyhow::bail!("{}", t!("error.filter_off"));
                     }
                     SunsetrClient::set_current_temp_gamma(temp, gamma)?;
                     Ok(())
@@ -316,7 +317,7 @@ impl AppModel {
             gamma: self.gamma,
             period: self.period,
             preset: self.preset,
-            preset_label: self.preset.label().to_string(),
+            preset_label: self.preset.label(),
             next_period: self.next_period.clone(),
             backend_ok: self.backend_ok,
             error: self.error.clone(),
@@ -433,11 +434,10 @@ impl AppModel {
             SettingsOutput::SetBackend(kind) => {
                 if !kind.is_supported() {
                     let tool = kind.required_tool().unwrap_or("hyprctl");
-                    self.error = Some(format!(
-                        "backend '{}' indisponível: '{}' não encontrado ou sessão não é Hyprland",
-                        kind.as_str(),
-                        tool
-                    ));
+                    self.error = Some(
+                        t!("error.backend_tool_missing", backend = kind.as_str(), tool = tool)
+                            .into_owned(),
+                    );
                     self.sync_children();
                     return;
                 }
@@ -503,7 +503,7 @@ fn spawn_refresh(sender: ComponentSender<AppModel>) {
                 running: false,
                 status: None,
                 cfg: None,
-                error: Some("sunsetr não encontrado no PATH".into()),
+                error: Some(t!("error.sunsetr_not_in_path").into_owned()),
                 conflicts: Vec::new(),
             });
             return;
