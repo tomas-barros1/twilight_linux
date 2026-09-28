@@ -5,7 +5,7 @@ edition = "2021"
 description = "Filtro de luz azul nativo para Linux, inspirado no Twilight (Android)"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/tom/twilight_linux"
+repository = "https://github.com/tomas-barros1/twilight_linux"
 
 [[bin]]
 name = "twilight-linux"
