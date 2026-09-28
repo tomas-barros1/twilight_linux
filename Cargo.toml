@@ -1,14 +1,14 @@
 [package]
-name = "twilight_pc"
+name = "twilight_linux"
 version = "0.1.0"
 edition = "2021"
 description = "Filtro de luz azul nativo para Linux, inspirado no Twilight (Android)"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/tom/twilight_pc"
+repository = "https://github.com/tom/twilight_linux"
 
 [[bin]]
-name = "twilight-pc"
+name = "twilight-linux"
 path = "src/main.rs"
 
 [dependencies]

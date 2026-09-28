@@ -1,4 +1,4 @@
-//! Twilight PC — filtro de luz azul nativo para Linux (GTK 4 / libadwaita).
+//! Twilight Linux — filtro de luz azul nativo para Linux (GTK 4 / libadwaita).
 //!
 //! Backend padrão: [sunsetr](https://github.com/psi4j/sunsetr), controlado via CLI.
 
@@ -24,11 +24,25 @@ fn main() {
 
     rust_i18n::set_locale(&detect_locale());
 
+    // Renomeação do app (twilight_pc → twilight_linux): move a config antiga
+    // e realinha o daemon/unit se estiverem apontando para o caminho legado.
+    match config::migrate_legacy_config() {
+        Ok(true) => {
+            if backend::SunsetrClient::is_available() && backend::SunsetrClient::is_running() {
+                if let Err(e) = backend::SunsetrClient::ensure_running() {
+                    tracing::warn!("falha ao realinhar o sunsetr após migração: {e}");
+                }
+            }
+        }
+        Ok(false) => {}
+        Err(e) => tracing::warn!("falha ao migrar config legada do twilight_pc: {e}"),
+    }
+
     // Preferir AdwStyleManager em vez de GtkSettings:gtk-application-prefer-dark-theme.
     let _ = adw::init();
     apply_color_scheme();
 
-    let app = RelmApp::new("org.twilight_pc.Twilight");
+    let app = RelmApp::new("org.twilightlinux.Twilight");
     apply_color_scheme();
     app.run::<AppModel>(());
 }

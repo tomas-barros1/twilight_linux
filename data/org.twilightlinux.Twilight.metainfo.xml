@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>org.twilight_pc.Twilight</id>
+  <id>org.twilightlinux.Twilight</id>
   <name>Twilight</name>
   <name xml:lang="pt_BR">Twilight</name>
   <summary>Blue light filter for Wayland</summary>
   <summary xml:lang="pt_BR">Filtro de luz azul para Wayland</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
-  <developer_name>Twilight PC</developer_name>
+  <developer_name>Twilight Linux</developer_name>
   <description>
     <p>
-      Twilight PC is a native GTK 4 / libadwaita front-end for the sunsetr
+      Twilight Linux is a native GTK 4 / libadwaita front-end for the sunsetr
       blue-light filter on Wayland compositors such as Hyprland.
     </p>
     <p xml:lang="pt_BR">
-      Twilight PC é uma interface nativa GTK 4 / libadwaita para o filtro de
+      Twilight Linux é uma interface nativa GTK 4 / libadwaita para o filtro de
       luz azul sunsetr em compositors Wayland como o Hyprland.
     </p>
     <ul>
@@ -23,10 +23,10 @@
       <li>Uses an isolated sunsetr config (does not overwrite ~/.config/sunsetr)</li>
     </ul>
   </description>
-  <launchable type="desktop-id">org.twilight_pc.Twilight.desktop</launchable>
+  <launchable type="desktop-id">org.twilightlinux.Twilight.desktop</launchable>
   <url type="homepage">https://twilight.urbandroid.org/</url>
   <provides>
-    <binary>twilight-pc</binary>
+    <binary>twilight-linux</binary>
   </provides>
   <recommends>
     <control>pointing</control>

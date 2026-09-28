@@ -8,8 +8,8 @@ METAINFODIR := $(DATADIR)/metainfo
 ICONDIR     := $(DATADIR)/icons/hicolor/scalable/apps
 SYSTEMDUSERUNITDIR := $(PREFIX)/lib/systemd/user
 
-APPID       := org.twilight_pc.Twilight
-BINARY      := twilight-pc
+APPID       := org.twilightlinux.Twilight
+BINARY      := twilight-linux
 CARGO_TARGET := target/release/$(BINARY)
 
 .PHONY: all build release clean install uninstall check test

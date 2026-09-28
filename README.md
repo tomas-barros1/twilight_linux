@@ -1,4 +1,4 @@
-# Twilight PC
+# Twilight Linux
 
 Filtro de luz azul nativo para Linux, inspirado no [Twilight](https://twilight.urbandroid.org/) para Android.
 
@@ -21,9 +21,9 @@ sudo pacman -S --needed hyprsunset
 ```bash
 cd twilight_pc
 cargo build --release
-install -Dm755 target/release/twilight-pc ~/.local/bin/twilight-pc
-install -Dm644 data/org.twilight_pc.Twilight.desktop \
-  ~/.local/share/applications/org.twilight_pc.Twilight.desktop
+install -Dm755 target/release/twilight-linux ~/.local/bin/twilight-linux
+install -Dm644 data/org.twilightlinux.Twilight.desktop \
+  ~/.local/share/applications/org.twilightlinux.Twilight.desktop
 ```
 
 Ou rode direto:
@@ -35,7 +35,7 @@ cargo run --release
 ## Uso
 
 1. Certifique-se de que o **sunsetr** está disponível (`sunsetr --version`).
-2. Abra o Twilight PC — o painel mostra período, temperatura e gamma atuais.
+2. Abra o Twilight Linux — o painel mostra período, temperatura e gamma atuais.
 3. Use o interruptor para ligar/desligar o filtro.
 4. Ajuste temperatura (K), intensidade e gamma; as mudanças vão para o sunsetr com debounce.
 5. Presets **Dia / Pôr do sol / Noite** usam modo estático; **Agendado** restaura o modo de transição (geo/manual).
@@ -49,9 +49,11 @@ Fechar a janela **não** desliga o filtro (opção “Ocultar ao fechar”). O p
 
 O Twilight **não** usa `~/.config/sunsetr/`. Em vez disso grava em:
 
-`~/.config/twilight/sunsetr/sunsetr.toml`
+`~/.config/twilightlinux/sunsetr/sunsetr.toml`
 
 Ao ligar o filtro, o app para qualquer sunsetr padrão (incluindo `sunsetr.service`) e inicia uma instância com `--config` apontando para essa pasta.
+
+> Vem de uma versão anterior (`twilight_pc`)? A config de `~/.config/twilight/` é **migrada automaticamente** para `~/.config/twilightlinux/` na primeira execução, e a unit `twilight-sunsetr.service` é regravada se apontar para o caminho antigo.
 
 ### Troca de backend
 
@@ -75,8 +77,8 @@ O app avisa se detectar `hyprsunset`, `gammastep`, `wlsunset` ou `redshift` roda
 
 | Arquivo | Função |
 |---------|--------|
-| `~/.config/twilight/config.toml` | Preferências da UI |
-| `~/.config/twilight/sunsetr/` | Config do sunsetr **isolada** (via `--config`) |
+| `~/.config/twilightlinux/config.toml` | Preferências da UI |
+| `~/.config/twilightlinux/sunsetr/` | Config do sunsetr **isolada** (via `--config`) |
 | `~/.config/sunsetr/` | **Não é usado** pelo Twilight |
 
 ## Desenvolvimento

@@ -47,7 +47,7 @@
   "mode.static": "Static (no schedule)",
 
   "settings.schedule": "Schedule",
-  "settings.schedule.desc": "Saved in ~/.config/twilight/sunsetr/ (isolated from ~/.config/sunsetr).",
+  "settings.schedule.desc": "Saved in ~/.config/twilightlinux/sunsetr/ (isolated from ~/.config/sunsetr).",
   "settings.mode": "Transition mode",
   "settings.sunset": "Night start (sunset)",
   "settings.sunrise": "Night end (sunrise)",

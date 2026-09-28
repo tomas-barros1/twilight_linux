@@ -1,4 +1,4 @@
-//! Cliente CLI para o daemon sunsetr (instância isolada do Twilight PC).
+//! Cliente CLI para o daemon sunsetr (instância isolada do Twilight Linux).
 //!
 //! Usa `~/.config/.../sunsetr/` via `--config`, sem ler/escrever `~/.config/sunsetr`.
 
@@ -263,7 +263,7 @@ pub struct SunsetrClient;
 impl SunsetrClient {
     /// Diretório de config isolado do Twilight (nunca `~/.config/sunsetr`).
     pub fn config_dir() -> Result<PathBuf> {
-        let dirs = directories::ProjectDirs::from("org", "twilight_pc", "Twilight")
+        let dirs = directories::ProjectDirs::from("org", "twilightlinux", "TwilightLinux")
             .context("não foi possível resolver XDG config")?;
         Ok(dirs.config_dir().join("sunsetr"))
     }
@@ -541,7 +541,7 @@ impl UiPreset {
     }
 }
 
-const DEFAULT_TOML: &str = r#"# Twilight PC — config isolada (não usa ~/.config/sunsetr)
+const DEFAULT_TOML: &str = r#"# Twilight Linux — config isolada (não usa ~/.config/sunsetr)
 backend = "auto"
 transition_mode = "static"
 smoothing = true

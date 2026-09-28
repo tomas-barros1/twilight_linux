@@ -1,4 +1,4 @@
-//! Configuração persistente do Twilight PC (não confundir com sunsetr.toml).
+//! Configuração persistente do Twilight Linux (não confundir com sunsetr.toml).
 
 use std::fs;
 use std::path::PathBuf;
@@ -83,7 +83,7 @@ impl AppConfig {
     }
 
     pub fn path() -> Result<PathBuf> {
-        let dirs = directories::ProjectDirs::from("org", "twilight_pc", "Twilight")
+        let dirs = directories::ProjectDirs::from("org", "twilightlinux", "TwilightLinux")
             .context("não foi possível resolver XDG config")?;
         Ok(dirs.config_dir().join("config.toml"))
     }
@@ -104,25 +104,7 @@ impl AppConfig {
 pub fn set_systemd_autostart(enable: bool) -> Result<()> {
     let unit_path = systemd_unit_path()?;
     if enable {
-        let config_dir = crate::backend::SunsetrClient::ensure_config_dir()?;
-        let unit = format!(
-            r#"[Unit]
-Description=Twilight PC blue-light filter (sunsetr isolado)
-PartOf=graphical-session.target
-After=graphical-session.target
-ConditionEnvironment=WAYLAND_DISPLAY
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/sunsetr --config {config}
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=graphical-session.target
-"#,
-            config = config_dir.display()
-        );
+        let unit = unit_contents()?;
         if let Some(parent) = unit_path.parent() {
             fs::create_dir_all(parent)?;
         }
@@ -168,6 +150,100 @@ fn systemd_unit_path() -> Result<PathBuf> {
     Ok(home
         .home_dir()
         .join(".config/systemd/user/twilight-sunsetr.service"))
+}
+
+/// Conteúdo da unit `twilight-sunsetr.service` (config isolada do app).
+fn unit_contents() -> Result<String> {
+    let config_dir = crate::backend::SunsetrClient::ensure_config_dir()?;
+    Ok(format!(
+        r#"[Unit]
+Description=Twilight Linux blue-light filter (sunsetr isolado)
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sunsetr --config {config}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target
+"#,
+        config = config_dir.display()
+    ))
+}
+
+/// Migra a configuração da identidade antiga (`twilight_pc` → `twilight_linux`).
+///
+/// Move `~/.config/twilight` → `~/.config/twilightlinux` e regrava a unit
+/// `twilight-sunsetr.service` se ela ainda apontar para o caminho legado.
+/// Retorna `true` quando a pasta foi movida.
+pub fn migrate_legacy_config() -> Result<bool> {
+    let moved = move_legacy_dir()?;
+    refresh_systemd_unit_if_stale()?;
+    Ok(moved)
+}
+
+fn move_legacy_dir() -> Result<bool> {
+    let legacy = legacy_config_dir()?;
+    let current = AppConfig::path()?
+        .parent()
+        .context("pai do config dir")?
+        .to_path_buf();
+
+    if !legacy.exists() || current.exists() {
+        return Ok(false);
+    }
+    if let Some(parent) = current.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    fs::rename(&legacy, &current)
+        .with_context(|| format!("migrar {} → {}", legacy.display(), current.display()))?;
+    tracing::info!(
+        "config migrada: {} → {}",
+        legacy.display(),
+        current.display()
+    );
+    Ok(true)
+}
+
+/// Caminho legado usado pelo `twilight_pc` (~/.config/twilight).
+fn legacy_config_dir() -> Result<PathBuf> {
+    let dirs = directories::ProjectDirs::from("org", "twilight_pc", "Twilight")
+        .context("não foi possível resolver XDG config")?;
+    Ok(dirs.config_dir().to_path_buf())
+}
+
+/// Se a unit do usuário ainda aponta para `~/.config/twilight/`, regrava com o
+/// caminho novo, recarrega o systemd e reinicia o serviço se estava ativo.
+fn refresh_systemd_unit_if_stale() -> Result<()> {
+    let unit_path = systemd_unit_path()?;
+    let Ok(content) = fs::read_to_string(&unit_path) else {
+        return Ok(());
+    };
+    if !content.contains(".config/twilight/") {
+        return Ok(());
+    }
+
+    let fresh = unit_contents()?;
+    fs::write(&unit_path, fresh)?;
+    let _ = std::process::Command::new("systemctl")
+        .args(["--user", "daemon-reload"])
+        .status();
+    let active = std::process::Command::new("systemctl")
+        .args(["--user", "is-active", "twilight-sunsetr.service"])
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false);
+    if active {
+        let _ = std::process::Command::new("systemctl")
+            .args(["--user", "restart", "twilight-sunsetr.service"])
+            .status();
+    }
+    tracing::info!("twilight-sunsetr.service regravada com o config dir novo");
+    Ok(())
 }
 
 #[cfg(test)]

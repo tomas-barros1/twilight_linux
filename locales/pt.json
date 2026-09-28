@@ -47,7 +47,7 @@
   "mode.static": "Estático (sem agendamento)",
 
   "settings.schedule": "Agendamento",
-  "settings.schedule.desc": "Grava em ~/.config/twilight/sunsetr/ (isolado de ~/.config/sunsetr).",
+  "settings.schedule.desc": "Grava em ~/.config/twilightlinux/sunsetr/ (isolado de ~/.config/sunsetr).",
   "settings.mode": "Modo de transição",
   "settings.sunset": "Início da noite (pôr do sol)",
   "settings.sunrise": "Fim da noite (nascer do sol)",

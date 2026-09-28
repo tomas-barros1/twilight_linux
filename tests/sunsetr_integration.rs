@@ -1,9 +1,9 @@
 //! Teste de integração opcional com o binário sunsetr (ignorado se ausente).
 
-use twilight_pc_test_support::*;
+use twilight_linux_test_support::*;
 
 // O binário não exporta lib — reimplementamos helpers mínimos aqui.
-mod twilight_pc_test_support {
+mod twilight_linux_test_support {
     use std::process::Command;
 
     pub fn sunsetr_available() -> bool {
