@@ -8,7 +8,7 @@ ConditionEnvironment=WAYLAND_DISPLAY
 [Service]
 Type=simple
 # %h = home do usuário; a pasta é criada pelo Twilight PC na primeira execução.
-ExecStart=/usr/bin/sunsetr --config %h/.config/Twilight/sunsetr
+ExecStart=/usr/bin/sunsetr --config %h/.config/twilight/sunsetr
 Restart=on-failure
 RestartSec=5
 

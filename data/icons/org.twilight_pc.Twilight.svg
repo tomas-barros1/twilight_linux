@@ -10,9 +10,17 @@
       <stop offset="0%" stop-color="#ffe9c2"/>
       <stop offset="100%" stop-color="#f0c27b"/>
     </linearGradient>
+    <!-- Recorte real da crescente: o gradiente do céu aparece através do corte. -->
+    <mask id="crescent-cut">
+      <rect width="128" height="128" fill="#fff"/>
+      <circle cx="96" cy="36" r="22" fill="#000"/>
+    </mask>
   </defs>
   <rect width="128" height="128" rx="28" fill="url(#sky)"/>
-  <circle cx="86" cy="44" r="26" fill="url(#moon)"/>
-  <circle cx="96" cy="36" r="22" fill="#4a2c6a"/>
+  <circle cx="86" cy="44" r="26" fill="url(#moon)" mask="url(#crescent-cut)"/>
+  <!-- Estrelinhas discretas no crepúsculo -->
+  <circle cx="30" cy="30" r="2.2" fill="#ffe9c2" opacity="0.9"/>
+  <circle cx="52" cy="20" r="1.6" fill="#ffe9c2" opacity="0.7"/>
+  <circle cx="18" cy="56" r="1.4" fill="#ffe9c2" opacity="0.6"/>
   <path d="M0 92 C28 78 52 98 76 88 C100 78 112 86 128 80 L128 128 L0 128 Z" fill="#2a1838" opacity="0.85"/>
 </svg>
